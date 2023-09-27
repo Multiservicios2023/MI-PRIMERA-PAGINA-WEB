@@ -1,47 +1,51 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Página Web</title>
-    <style>
-        /* Estilos CSS */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-        h1 {
-            font-size: 36px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        p {
-            font-size: 18px;
-            line-height: 1.6;
-        }
-    </style>
+    <title>Búsqueda de Respuestas</title>
 </head>
 <body>
-    <header>
-        <h1>Multiservicios del Reino</h1>
-    </header>
-    <div class="container">
-        <h2>Problema con tu Aire Acondicionado</h2>
-        <p>Mantén tus aires acondicionados en óptimas condiciones con Multiservicios del Reino</p>
-        <p>Ofrecemos servicios de Instalacion, mantenimiento y reparación para garantizar un ambiente fresco y confortable en tu hogar o negocio en La Guaira.Nuestro equipo técnico altamente capacitado se encarga de inspeccionar y limpiar tus equipos, asegurando su eficiencia y durabilidad. Contáctanos por WhatsApp al [+58 414 2486975] para obtener más información o para programar una visita de servicio. Confía en Multiservicios del Reino, tu mejor opción para el cuidado de tus aires acondicionados en La Guaira, Venezuela.</p>
-      </div>
+    <h1>Búsqueda de Respuestas</h1>
+    <form action="buscar.php" method="POST">
+        <label for="palabra">Palabra a buscar:</label>
+        <input type="text" id="palabra" name="palabra">
+        <input type="submit" value="Buscar">
+    </form>
 </body>
 </html>
+<?php
+require 'vendor/autoload.php'; // Carga la biblioteca PhpSpreadsheet
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $palabra = $_POST["palabra"];
+
+    // Carga el archivo Excel
+    $spreadsheet = IOFactory::load('tu_archivo_excel.xlsx');
+
+    // Selecciona la hoja de Excel
+    $worksheet = $spreadsheet->getActiveSheet();
+
+    $respuestas = [];
+
+    // Recorre las filas para buscar la palabra
+    foreach ($worksheet->getRowIterator() as $row) {
+        $cellValue = $worksheet->getCell('A' . $row->getRowIndex())->getValue(); // Cambia 'A' por la columna donde están las palabras
+        $respuesta = $worksheet->getCell('B' . $row->getRowIndex())->getValue(); // Cambia 'B' por la columna donde están las respuestas
+
+        if (strtolower($cellValue) == strtolower($palabra)) {
+            $respuestas[] = $respuesta;
+        }
+    }
+
+    if (empty($respuestas)) {
+        echo "No se encontraron respuestas para la palabra '$palabra'.";
+    } else {
+        echo "<h2>Respuestas:</h2>";
+        foreach ($respuestas as $respuesta) {
+            echo "<p>$respuesta</p>";
+        }
+    }
+}
+?>
+
